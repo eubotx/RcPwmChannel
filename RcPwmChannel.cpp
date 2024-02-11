@@ -177,7 +177,7 @@ void RcPwmChannel::updatePwmChannel()
     if (micros() > _pulseStartTime) {
       unsigned long newPulseLenght = micros() - _pulseStartTime;
       //check if pulse length within limits -> healthy signal
-      if (newPulseLenght <= _HIGH_PULSE_LENGTH && newPulseLenght >= _LOW_PULSE_LENGTH) {
+      if (newPulseLenght <= _INVALID_HIGH_THRESHOLD && newPulseLenght >= _INVALID_LOW_THRESHOLD) {
         _pulseLength = newPulseLenght;
         _lastGoodSignal = millis();
       }
@@ -200,7 +200,7 @@ int RcPwmChannel::_convertPulseLengthPercent()
   _updatesDisabled = 0;
 
   //low-center
-  if (pulseLength<_CENTER_PULSE_LENGTH){
+  if (pulseLength < _CENTER_PULSE_LENGTH){
     int percent = map(pulseLength, _LOW_PULSE_LENGTH+_LOW_DEADZONE_LENGTH, _CENTER_PULSE_LENGTH-_CENTER_HALF_DEADZONE_LENGTH, -100, 0);
     if (percent<-100) return -100;  //cutoff low deadband
     else if (percent>0) return 0;  //cutoff center deadband
@@ -218,6 +218,7 @@ int RcPwmChannel::_convertPulseLengthPercent()
 
 int RcPwmChannel::_convertPulseLengthPercentWithoutCenter()
 {
+  _updatesDisabled = 1;
   unsigned long pulseLength = _pulseLength;
   _updatesDisabled = 0;
 
